@@ -1,0 +1,1336 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<!--Rendered using the Haskell Html Library v0.2-->
+<HTML
+><HEAD
+><META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=UTF-8"
+><TITLE
+>NPuzzle</TITLE
+><LINK HREF="haddock.css" REL="stylesheet" TYPE="text/css"
+><SCRIPT SRC="haddock-util.js" TYPE="text/javascript"
+></SCRIPT
+><SCRIPT TYPE="text/javascript"
+>window.onload = function () {setSynopsis("mini_NPuzzle.html")};</SCRIPT
+></HEAD
+><BODY
+><TABLE CLASS="vanilla" CELLSPACING="0" CELLPADDING="0"
+><TR
+><TD CLASS="topbar"
+><TABLE CLASS="vanilla" CELLSPACING="0" CELLPADDING="0"
+><TR
+><TD
+><IMG SRC="haskell_icon.gif" WIDTH="16" HEIGHT="16" ALT=" "
+></TD
+><TD CLASS="title"
+></TD
+><TD CLASS="topbut"
+><A HREF="index.html"
+>Contents</A
+></TD
+><TD CLASS="topbut"
+><A HREF="doc-index.html"
+>Index</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="modulebar"
+><TABLE CLASS="vanilla" CELLSPACING="0" CELLPADDING="0"
+><TR
+><TD
+><FONT SIZE="6"
+>NPuzzle</FONT
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD
+><TABLE CLASS="vanilla" CELLSPACING="0" CELLPADDING="0"
+><TR
+><TD CLASS="section4"
+><B
+>Contents</B
+></TD
+></TR
+><TR
+><TD
+><DL
+><DT
+><A HREF="#1"
+>Types
+</A
+></DT
+><DT
+><A HREF="#2"
+>Functions 
+</A
+></DT
+><DD
+><DL
+><DT
+><A HREF="#3"
+>Getting elements from structures
+</A
+></DT
+><DT
+><A HREF="#4"
+>Calculating the heuristic
+</A
+></DT
+><DT
+><A HREF="#5"
+>Generate states
+</A
+></DT
+><DT
+><A HREF="#6"
+>Inserting states into lists 
+</A
+></DT
+><DT
+><A HREF="#7"
+>Search functions
+</A
+></DT
+><DT
+><A HREF="#8"
+>IO functions and main
+</A
+></DT
+></DL
+></DD
+></DL
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="section1"
+>Description</TD
+></TR
+><TR
+><TD CLASS="doc"
+><P
+>Solver for an n-puzzle using the A* algorithm and the sum of the manhattan distances as its heuristic. This implementation works only for quadratic puzzles.
+</P
+><P
+>Explanation (Wikipedia):
+</P
+><P
+>The n-puzzle is known in various versions, including the 8 puzzle, the 15 puzzle, and with various names (Gem Puzzle, Boss Puzzle, Game of Fifteen, Mystic Square and many others). 
+ It is a sliding puzzle that consists of a frame of numbered square tiles in random order with one tile missing. If the size is 3x3, the puzzle is called the 8-puzzle or 9-puzzle, and if 4x4, 
+ the puzzle is called the 15-puzzle or 16-puzzle. The object of the puzzle is to place the tiles in order (see diagram) by making sliding moves that use the empty space.
+ The n-puzzle is a classical problem for modelling algorithms involving heuristics. Commonly used heuristics for this problem include counting the number of misplaced tiles and finding the sum 
+ of the Manhattan distances between each block and its position in the goal configuration. Note that both are admissible, i.e., they never overestimate the number of moves left, 
+ which ensures optimality for certain search algorithms such as A*.
+</P
+><P
+>(C) 2011 Stefan M&#xfc;nchow
+</P
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="section1"
+>Synopsis</TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="body"
+><TABLE CLASS="vanilla" CELLSPACING="0" CELLPADDING="0"
+><TR
+><TD CLASS="decl"
+><SPAN CLASS="keyword"
+>type</SPAN
+> <A HREF="#t%3ABoard"
+>Board</A
+> = [[Int]]</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><SPAN CLASS="keyword"
+>type</SPAN
+> <A HREF="#t%3APosition"
+>Position</A
+> = (Int, Int)</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><SPAN CLASS="keyword"
+>data</SPAN
+>  <A HREF="#t%3AState"
+>State</A
+>  = <A HREF="#v%3AState"
+>State</A
+> <A HREF="NPuzzle.html#t%3ABoard"
+>Board</A
+> Int</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><SPAN CLASS="keyword"
+>data</SPAN
+>  <A HREF="#t%3AResult"
+>Result</A
+>  = <A HREF="#v%3AResult"
+>Result</A
+> Bool [<A HREF="NPuzzle.html#t%3AState"
+>State</A
+>]</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3Avalue"
+>value</A
+> :: Maybe Int -&gt; Int</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3Aboard"
+>board</A
+> :: <A HREF="NPuzzle.html#t%3AState"
+>State</A
+> -&gt; <A HREF="NPuzzle.html#t%3ABoard"
+>Board</A
+></TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3Astates"
+>states</A
+> :: <A HREF="NPuzzle.html#t%3AResult"
+>Result</A
+> -&gt; [<A HREF="NPuzzle.html#t%3AState"
+>State</A
+>]</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AmanhattanMetric"
+>manhattanMetric</A
+> :: (<A HREF="NPuzzle.html#t%3APosition"
+>Position</A
+>, <A HREF="NPuzzle.html#t%3APosition"
+>Position</A
+>) -&gt; Int</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AcalculateCost"
+>calculateCost</A
+> :: Int -&gt; [<A HREF="NPuzzle.html#t%3APosition"
+>Position</A
+>] -&gt; [<A HREF="NPuzzle.html#t%3APosition"
+>Position</A
+>] -&gt; Int</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3Aposition"
+>position</A
+> :: <A HREF="NPuzzle.html#t%3ABoard"
+>Board</A
+> -&gt; Int -&gt; <A HREF="NPuzzle.html#t%3APosition"
+>Position</A
+></TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3Aposition2"
+>position2</A
+> :: <A HREF="NPuzzle.html#t%3ABoard"
+>Board</A
+> -&gt; Int -&gt; Int -&gt; <A HREF="NPuzzle.html#t%3APosition"
+>Position</A
+></TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AevalState"
+>evalState</A
+> :: [<A HREF="NPuzzle.html#t%3AState"
+>State</A
+>] -&gt; <A HREF="NPuzzle.html#t%3AState"
+>State</A
+> -&gt; <A HREF="NPuzzle.html#t%3AState"
+>State</A
+> -&gt; <A HREF="NPuzzle.html#t%3AState"
+>State</A
+></TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3ApossibleMoves"
+>possibleMoves</A
+> :: <A HREF="NPuzzle.html#t%3APosition"
+>Position</A
+> -&gt; Int -&gt; [<A HREF="NPuzzle.html#t%3APosition"
+>Position</A
+>]</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AreplaceElem"
+>replaceElem</A
+> ::  [a] -&gt; Int -&gt; a -&gt; [a]</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3Aswap"
+>swap</A
+> :: <A HREF="NPuzzle.html#t%3AState"
+>State</A
+> -&gt; <A HREF="NPuzzle.html#t%3APosition"
+>Position</A
+> -&gt; <A HREF="NPuzzle.html#t%3APosition"
+>Position</A
+> -&gt; <A HREF="NPuzzle.html#t%3AState"
+>State</A
+></TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3Amovements"
+>movements</A
+> :: <A HREF="NPuzzle.html#t%3AState"
+>State</A
+> -&gt; <A HREF="NPuzzle.html#t%3AState"
+>State</A
+> -&gt; [<A HREF="NPuzzle.html#t%3AState"
+>State</A
+>] -&gt; [<A HREF="NPuzzle.html#t%3AState"
+>State</A
+>]</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AinsertStates"
+>insertStates</A
+> :: [<A HREF="NPuzzle.html#t%3AState"
+>State</A
+>] -&gt; [<A HREF="NPuzzle.html#t%3AState"
+>State</A
+>] -&gt; [<A HREF="NPuzzle.html#t%3AState"
+>State</A
+>]</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AaddVisited"
+>addVisited</A
+> :: <A HREF="NPuzzle.html#t%3AState"
+>State</A
+> -&gt; <A HREF="NPuzzle.html#t%3AResult"
+>Result</A
+> -&gt; <A HREF="NPuzzle.html#t%3AResult"
+>Result</A
+></TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3Asearch"
+>search</A
+> :: [<A HREF="NPuzzle.html#t%3AState"
+>State</A
+>] -&gt; <A HREF="NPuzzle.html#t%3AState"
+>State</A
+> -&gt; [<A HREF="NPuzzle.html#t%3AState"
+>State</A
+>] -&gt; <A HREF="NPuzzle.html#t%3AResult"
+>Result</A
+></TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3Asolve"
+>solve</A
+> :: <A HREF="NPuzzle.html#t%3AState"
+>State</A
+> -&gt; <A HREF="NPuzzle.html#t%3AState"
+>State</A
+> -&gt; [<A HREF="NPuzzle.html#t%3ABoard"
+>Board</A
+>]</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AprintList"
+>printList</A
+> :: [Int] -&gt; IO ()</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AprintBoard"
+>printBoard</A
+> :: <A HREF="NPuzzle.html#t%3ABoard"
+>Board</A
+> -&gt; IO ()</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AprintResult"
+>printResult</A
+> :: [<A HREF="NPuzzle.html#t%3ABoard"
+>Board</A
+>] -&gt; IO ()</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AparseList"
+>parseList</A
+> :: ReadS <A HREF="NPuzzle.html#t%3ABoard"
+>Board</A
+></TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AparseBoard"
+>parseBoard</A
+> :: String -&gt; <A HREF="NPuzzle.html#t%3ABoard"
+>Board</A
+></TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AdimsEqual"
+>dimsEqual</A
+> :: <A HREF="NPuzzle.html#t%3ABoard"
+>Board</A
+> -&gt; Bool</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3Amain"
+>main</A
+> :: IO ()</TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="section1"
+><A NAME="1"
+><A NAME="1"
+>Types
+</A
+></A
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><SPAN CLASS="keyword"
+>type</SPAN
+> <A NAME="t:Board"
+><A NAME="t%3ABoard"
+></A
+></A
+><B
+>Board</B
+> = [[Int]]</TD
+></TR
+><TR
+><TD CLASS="doc"
+>Board is represented as a matrix of Int.
+</TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><SPAN CLASS="keyword"
+>type</SPAN
+> <A NAME="t:Position"
+><A NAME="t%3APosition"
+></A
+></A
+><B
+>Position</B
+> = (Int, Int)</TD
+></TR
+><TR
+><TD CLASS="doc"
+>Position is a tuple of Int.
+</TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><SPAN CLASS="keyword"
+>data</SPAN
+>  <A NAME="t:State"
+><A NAME="t%3AState"
+></A
+></A
+><B
+>State</B
+>  </TD
+></TR
+><TR
+><TD CLASS="body"
+><TABLE CLASS="vanilla" CELLSPACING="0" CELLPADDING="0"
+><TR
+><TD CLASS="ndoc"
+>Object to represent a current state of the puzzle with a representation of 
+   the board and its cost value pursuant to the heuristic.
+</TD
+></TR
+><TR
+><TD CLASS="section4"
+>Constructors</TD
+></TR
+><TR
+><TD CLASS="body"
+><TABLE CLASS="vanilla" CELLSPACING="1" CELLPADDING="0"
+><TR
+><TD CLASS="arg"
+><A NAME="v:State"
+><A NAME="v%3AState"
+></A
+></A
+><B
+>State</B
+> <A HREF="NPuzzle.html#t%3ABoard"
+>Board</A
+> Int</TD
+><TD CLASS="rdoc"
+>Creates a new State object with the given board and cost value.
+</TD
+></TR
+></TABLE
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><SPAN CLASS="keyword"
+>data</SPAN
+>  <A NAME="t:Result"
+><A NAME="t%3AResult"
+></A
+></A
+><B
+>Result</B
+>  </TD
+></TR
+><TR
+><TD CLASS="body"
+><TABLE CLASS="vanilla" CELLSPACING="0" CELLPADDING="0"
+><TR
+><TD CLASS="ndoc"
+>Object to represent a search result. A result consists of a value indicating
+   success or failure and a list of all visited states.
+</TD
+></TR
+><TR
+><TD CLASS="section4"
+>Constructors</TD
+></TR
+><TR
+><TD CLASS="body"
+><TABLE CLASS="vanilla" CELLSPACING="1" CELLPADDING="0"
+><TR
+><TD CLASS="arg"
+><A NAME="v:Result"
+><A NAME="v%3AResult"
+></A
+></A
+><B
+>Result</B
+> Bool [<A HREF="NPuzzle.html#t%3AState"
+>State</A
+>]</TD
+><TD CLASS="rdoc"
+>Creates a new Result object with the given result value and state list. 
+</TD
+></TR
+></TABLE
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="section1"
+><A NAME="2"
+><A NAME="2"
+>Functions 
+</A
+></A
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="section2"
+><A NAME="3"
+><A NAME="3"
+>Getting elements from structures
+</A
+></A
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A NAME="v:value"
+><A NAME="v%3Avalue"
+></A
+></A
+><B
+>value</B
+> :: Maybe Int -&gt; Int</TD
+></TR
+><TR
+><TD CLASS="doc"
+>Returns the value of a Maybe type. Throws an error if the value is Nothing.
+</TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A NAME="v:board"
+><A NAME="v%3Aboard"
+></A
+></A
+><B
+>board</B
+> :: <A HREF="NPuzzle.html#t%3AState"
+>State</A
+> -&gt; <A HREF="NPuzzle.html#t%3ABoard"
+>Board</A
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+>Returns the board of a State object.
+</TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A NAME="v:states"
+><A NAME="v%3Astates"
+></A
+></A
+><B
+>states</B
+> :: <A HREF="NPuzzle.html#t%3AResult"
+>Result</A
+> -&gt; [<A HREF="NPuzzle.html#t%3AState"
+>State</A
+>]</TD
+></TR
+><TR
+><TD CLASS="doc"
+>Returns the state list from a Result object.
+</TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="section2"
+><A NAME="4"
+><A NAME="4"
+>Calculating the heuristic
+</A
+></A
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A NAME="v:manhattanMetric"
+><A NAME="v%3AmanhattanMetric"
+></A
+></A
+><B
+>manhattanMetric</B
+> :: (<A HREF="NPuzzle.html#t%3APosition"
+>Position</A
+>, <A HREF="NPuzzle.html#t%3APosition"
+>Position</A
+>) -&gt; Int</TD
+></TR
+><TR
+><TD CLASS="doc"
+>Calculates the manhattan distance of two points.
+</TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A NAME="v:calculateCost"
+><A NAME="v%3AcalculateCost"
+></A
+></A
+><B
+>calculateCost</B
+> :: Int -&gt; [<A HREF="NPuzzle.html#t%3APosition"
+>Position</A
+>] -&gt; [<A HREF="NPuzzle.html#t%3APosition"
+>Position</A
+>] -&gt; Int</TD
+></TR
+><TR
+><TD CLASS="doc"
+>Calculates the heuristic for then given current cost value, state and goal state.
+</TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A NAME="v:position"
+><A NAME="v%3Aposition"
+></A
+></A
+><B
+>position</B
+> :: <A HREF="NPuzzle.html#t%3ABoard"
+>Board</A
+> -&gt; Int -&gt; <A HREF="NPuzzle.html#t%3APosition"
+>Position</A
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+>Returns the position (x, y) of the value on the board.
+</TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A NAME="v:position2"
+><A NAME="v%3Aposition2"
+></A
+></A
+><B
+>position2</B
+> :: <A HREF="NPuzzle.html#t%3ABoard"
+>Board</A
+> -&gt; Int -&gt; Int -&gt; <A HREF="NPuzzle.html#t%3APosition"
+>Position</A
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+>Returns the position (x, y) of the value on the board, using the specified start
+   index to count rows from.
+</TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A NAME="v:evalState"
+><A NAME="v%3AevalState"
+></A
+></A
+><B
+>evalState</B
+> :: [<A HREF="NPuzzle.html#t%3AState"
+>State</A
+>] -&gt; <A HREF="NPuzzle.html#t%3AState"
+>State</A
+> -&gt; <A HREF="NPuzzle.html#t%3AState"
+>State</A
+> -&gt; <A HREF="NPuzzle.html#t%3AState"
+>State</A
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+>Calculates the cost value of the given state by adding up the manhattan distances
+   of every piece on the current board compared to the position of the piece in the goal state.
+</TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="section2"
+><A NAME="5"
+><A NAME="5"
+>Generate states
+</A
+></A
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A NAME="v:possibleMoves"
+><A NAME="v%3ApossibleMoves"
+></A
+></A
+><B
+>possibleMoves</B
+> :: <A HREF="NPuzzle.html#t%3APosition"
+>Position</A
+> -&gt; Int -&gt; [<A HREF="NPuzzle.html#t%3APosition"
+>Position</A
+>]</TD
+></TR
+><TR
+><TD CLASS="doc"
+>Returns a list of all possible positions to which a piece at the specified position can
+   be moved.
+</TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A NAME="v:replaceElem"
+><A NAME="v%3AreplaceElem"
+></A
+></A
+><B
+>replaceElem</B
+> ::  [a] -&gt; Int -&gt; a -&gt; [a]</TD
+></TR
+><TR
+><TD CLASS="doc"
+>Returns a list with the element at the specified index replaced by the specified value.
+</TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A NAME="v:swap"
+><A NAME="v%3Aswap"
+></A
+></A
+><B
+>swap</B
+> :: <A HREF="NPuzzle.html#t%3AState"
+>State</A
+> -&gt; <A HREF="NPuzzle.html#t%3APosition"
+>Position</A
+> -&gt; <A HREF="NPuzzle.html#t%3APosition"
+>Position</A
+> -&gt; <A HREF="NPuzzle.html#t%3AState"
+>State</A
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+>Swaps the values of two positions on the board and returns the resulting state.
+</TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A NAME="v:movements"
+><A NAME="v%3Amovements"
+></A
+></A
+><B
+>movements</B
+> :: <A HREF="NPuzzle.html#t%3AState"
+>State</A
+> -&gt; <A HREF="NPuzzle.html#t%3AState"
+>State</A
+> -&gt; [<A HREF="NPuzzle.html#t%3AState"
+>State</A
+>] -&gt; [<A HREF="NPuzzle.html#t%3AState"
+>State</A
+>]</TD
+></TR
+><TR
+><TD CLASS="doc"
+>Generates a list of all following states of the specified state with their cost
+   value.
+</TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="section2"
+><A NAME="6"
+><A NAME="6"
+>Inserting states into lists 
+</A
+></A
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A NAME="v:insertStates"
+><A NAME="v%3AinsertStates"
+></A
+></A
+><B
+>insertStates</B
+> :: [<A HREF="NPuzzle.html#t%3AState"
+>State</A
+>] -&gt; [<A HREF="NPuzzle.html#t%3AState"
+>State</A
+>] -&gt; [<A HREF="NPuzzle.html#t%3AState"
+>State</A
+>]</TD
+></TR
+><TR
+><TD CLASS="doc"
+>Inserts each element of a given list of states into a second list. Assuming that the second list
+   is sorted by cost value in ascending order, the states are inserted at the correct position based
+   on the ordering of the State class.
+</TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A NAME="v:addVisited"
+><A NAME="v%3AaddVisited"
+></A
+></A
+><B
+>addVisited</B
+> :: <A HREF="NPuzzle.html#t%3AState"
+>State</A
+> -&gt; <A HREF="NPuzzle.html#t%3AResult"
+>Result</A
+> -&gt; <A HREF="NPuzzle.html#t%3AResult"
+>Result</A
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+>If result value is True, a new Result with the specified state added to the list of visited states 
+   is returned. Otherwise the given result is returned without adding the given state.
+</TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="section2"
+><A NAME="7"
+><A NAME="7"
+>Search functions
+</A
+></A
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A NAME="v:search"
+><A NAME="v%3Asearch"
+></A
+></A
+><B
+>search</B
+> :: [<A HREF="NPuzzle.html#t%3AState"
+>State</A
+>] -&gt; <A HREF="NPuzzle.html#t%3AState"
+>State</A
+> -&gt; [<A HREF="NPuzzle.html#t%3AState"
+>State</A
+>] -&gt; <A HREF="NPuzzle.html#t%3AResult"
+>Result</A
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+>Implements the A* search algorithm. Searches the given open list containing all nodes to expand
+   sorted by cost value in ascending order (cheapest node is expanded first). The given result
+   contains all visited nodes and is used to avoid cycles.
+</TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A NAME="v:solve"
+><A NAME="v%3Asolve"
+></A
+></A
+><B
+>solve</B
+> :: <A HREF="NPuzzle.html#t%3AState"
+>State</A
+> -&gt; <A HREF="NPuzzle.html#t%3AState"
+>State</A
+> -&gt; [<A HREF="NPuzzle.html#t%3ABoard"
+>Board</A
+>]</TD
+></TR
+><TR
+><TD CLASS="doc"
+>Solves the puzzle with the given start state.
+</TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="section2"
+><A NAME="8"
+><A NAME="8"
+>IO functions and main
+</A
+></A
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A NAME="v:printList"
+><A NAME="v%3AprintList"
+></A
+></A
+><B
+>printList</B
+> :: [Int] -&gt; IO ()</TD
+></TR
+><TR
+><TD CLASS="doc"
+>Prints a list of ints to stdout in a formatted way.
+</TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A NAME="v:printBoard"
+><A NAME="v%3AprintBoard"
+></A
+></A
+><B
+>printBoard</B
+> :: <A HREF="NPuzzle.html#t%3ABoard"
+>Board</A
+> -&gt; IO ()</TD
+></TR
+><TR
+><TD CLASS="doc"
+>Prints a board to stdout in a formatted way.
+</TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A NAME="v:printResult"
+><A NAME="v%3AprintResult"
+></A
+></A
+><B
+>printResult</B
+> :: [<A HREF="NPuzzle.html#t%3ABoard"
+>Board</A
+>] -&gt; IO ()</TD
+></TR
+><TR
+><TD CLASS="doc"
+>Prints a sequence of boards to stdout in a formatted way.
+</TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A NAME="v:parseList"
+><A NAME="v%3AparseList"
+></A
+></A
+><B
+>parseList</B
+> :: ReadS <A HREF="NPuzzle.html#t%3ABoard"
+>Board</A
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+>Parses a list of lists of Ints.
+</TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A NAME="v:parseBoard"
+><A NAME="v%3AparseBoard"
+></A
+></A
+><B
+>parseBoard</B
+> :: String -&gt; <A HREF="NPuzzle.html#t%3ABoard"
+>Board</A
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+>Parses a board from stdin and returns it.
+</TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A NAME="v:dimsEqual"
+><A NAME="v%3AdimsEqual"
+></A
+></A
+><B
+>dimsEqual</B
+> :: <A HREF="NPuzzle.html#t%3ABoard"
+>Board</A
+> -&gt; Bool</TD
+></TR
+><TR
+><TD CLASS="doc"
+>Checks if a the dimensions of a board are equal.
+</TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A NAME="v:main"
+><A NAME="v%3Amain"
+></A
+></A
+><B
+>main</B
+> :: IO ()</TD
+></TR
+><TR
+><TD CLASS="doc"
+>Main function. Takes the start state and the goal state as lists of Int as
+   command line arguments.   
+</TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="botbar"
+>Produced by <A HREF="http://www.haskell.org/haddock/"
+>Haddock</A
+> version 2.6.0</TD
+></TR
+></TABLE
+></BODY
+></HTML
+>
